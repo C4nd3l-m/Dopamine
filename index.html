@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dopamine Scroll</title>
+    <link rel="stylesheet" href="./src/style.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="gameCanvas"></canvas>
+      <div id="ui-layer">
+        <div id="main-menu" class="screen active">
+          <h1 class="title glow">DOPAMINE<br>SCROLL</h1>
+          <p class="blink">SWIPE UP TO START</p>
+        </div>
+        <div id="game-hud" class="screen">
+          <div class="score-container">
+            <span id="score">0</span>
+            <span class="label">LIKES</span>
+          </div>
+          <div class="streak-container">
+            <div id="streak-bar"></div>
+          </div>
+        </div>
+        <div id="game-over" class="screen">
+          <h2 class="glow">DOOMSCROLLED</h2>
+          <p>SCORE: <span id="final-score">0</span></p>
+          <p class="blink">TAP TO RESTART</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

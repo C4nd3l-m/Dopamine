@@ -1,0 +1,127 @@
+:root {
+  --neon-pink: #ff00ff;
+  --neon-blue: #00ffff;
+  --bg-color: #050505;
+  --font-main: 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  overflow: hidden;
+  font-family: var(--font-main);
+  color: white;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: auto;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#game-hud {
+  justify-content: flex-start;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.title {
+  font-size: 4rem;
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+}
+
+.glow {
+  text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.score-container {
+  text-align: center;
+}
+
+#score {
+  font-size: 3rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--neon-pink);
+}
+
+.label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  display: block;
+}
+
+.streak-container {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 10px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#streak-bar {
+  width: 100%;
+  height: 100%; /* Will be adjusted via JS */
+  background: linear-gradient(to top, var(--neon-blue), var(--neon-pink));
+  box-shadow: 0 0 10px var(--neon-pink);
+  transform-origin: bottom;
+  transition: transform 0.1s linear;
+}

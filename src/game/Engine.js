@@ -1,5 +1,6 @@
 import { Player } from './Player.js';
 import { World } from './World.js';
+import { Maze } from './Maze.js';
 import { Particles } from './Particles.js';
 import { SoundManager } from './Audio.js';
 
@@ -14,8 +15,12 @@ export class Engine {
 
         this.player = new Player(this.canvas);
         this.world = new World(this.canvas);
+        this.maze = new Maze(this.canvas);
         this.particles = new Particles();
         this.audio = new SoundManager();
+
+        this.currentMode = 'NORMAL';
+        this.activeWorld = this.world; // Will switch between world and maze
 
         this.lastTime = 0;
         this.isRunning = false;
@@ -37,14 +42,36 @@ export class Engine {
         this.canvas.height = window.innerHeight;
     }
 
-    start() {
+    start(mode = 'NORMAL') {
         this.isRunning = true;
+        this.currentMode = mode;
+
+        // Switch between World and Maze based on mode
+        if (mode === 'ZEN') {
+            this.activeWorld = this.maze;
+            // Reset maze scroll for new game
+            this.maze.scrollY = 0;
+            this.maze.distance = 0;
+            this.maze.trail = [];
+        } else {
+            this.activeWorld = this.world;
+            this.world.setMode(mode);
+        }
+
+        // Reset player position for maze
+        if (mode === 'ZEN') {
+            this.player.x = this.canvas.width / 2;
+            this.player.y = this.canvas.height / 2;
+        }
+
         this.lastTime = performance.now();
+        this.audio.playMusic(mode);
         this.loop(this.lastTime);
     }
 
     stop() {
         this.isRunning = false;
+        this.audio.stopMusic();
     }
 
     loop(timestamp) {
@@ -61,7 +88,16 @@ export class Engine {
 
     update(deltaTime) {
         this.player.update(deltaTime);
-        this.world.update(deltaTime);
+
+        // Update world/maze with player position for scrolling
+        if (this.currentMode === 'ZEN') {
+            this.activeWorld.update(deltaTime, this.player.y);
+            // Add trail point
+            this.activeWorld.addTrailPoint(this.player.x, this.player.y);
+        } else {
+            this.activeWorld.update(deltaTime);
+        }
+
         this.particles.update(deltaTime);
 
         // Shake decay
@@ -72,7 +108,7 @@ export class Engine {
 
         // Magnet Effect
         if (this.player.magnetActive) {
-            this.world.collectibles.forEach(col => {
+            this.activeWorld.collectibles.forEach(col => {
                 const dx = this.player.x - col.x;
                 const dy = this.player.y - col.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
@@ -85,7 +121,7 @@ export class Engine {
 
         // Collision Detection
         // 1. Player vs Collectibles
-        this.world.collectibles.forEach(col => {
+        this.activeWorld.collectibles.forEach(col => {
             if (col.collected) return;
             const dx = this.player.x - col.x;
             const dy = this.player.y - col.y;
@@ -102,7 +138,7 @@ export class Engine {
         });
 
         // 2. Player vs Powerups
-        this.world.powerups.forEach(p => {
+        this.activeWorld.powerups.forEach(p => {
             if (p.collected) return;
             const dx = this.player.x - p.x;
             const dy = this.player.y - p.y;
@@ -122,8 +158,9 @@ export class Engine {
             }
         });
 
-        // 3. Player vs Obstacles
-        for (const obs of this.world.obstacles) {
+        // 3. Player vs Obstacles/Walls
+        const obstacles = this.activeWorld.obstacles || this.activeWorld.walls || [];
+        for (const obs of obstacles) {
             // Simple AABB vs Circle check (approximated as Circle vs Rectangle)
             // Find closest point on rect to circle center
             const closestX = Math.max(obs.x - obs.width / 2, Math.min(this.player.x, obs.x + obs.width / 2));
@@ -134,6 +171,7 @@ export class Engine {
             const distSq = dx * dx + dy * dy;
 
             if (distSq < this.player.radius * this.player.radius) {
+                // All modes: check shield or game over
                 if (this.player.shieldActive) {
                     this.player.shieldActive = false;
                     this.particles.spawn(this.player.x, this.player.y, '#00ffff', 30);
@@ -159,11 +197,17 @@ export class Engine {
             this.ctx.translate(dx, dy);
         }
 
-        // Clear screen with trail effect for "speed" feel
-        this.ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
+        // Clear screen with different effects based on mode
+        if (this.currentMode === 'ZEN') {
+            // Darker, cleaner background for Zen mode
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        } else {
+            // Trail effect for speed feel in Normal/Hardcore
+            this.ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
+        }
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.world.draw(this.ctx);
+        this.activeWorld.draw(this.ctx);
         this.particles.draw(this.ctx);
         this.player.draw(this.ctx);
 

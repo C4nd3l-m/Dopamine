@@ -8,7 +8,7 @@ export class World {
     this.spawnTimer = 0;
     this.difficultyMultiplier = 1;
     this.distance = 0;
-    
+
     // Biomes
     this.biomes = [
       { bg: '#050505', obstacle: '#ff0055', collect: '#00ff00' }, // Neon Cyber
@@ -16,10 +16,30 @@ export class World {
       { bg: '#001a1a', obstacle: '#ff00ff', collect: '#ffff00' }, // Toxic
     ];
     this.currentBiome = 0;
+    this.mode = 'NORMAL'; // NORMAL, HARDCORE, ZEN
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+    if (this.mode === 'HARDCORE') {
+      this.speed = 500;
+    } else if (this.mode === 'ZEN') {
+      this.speed = 200;
+    } else {
+      this.speed = 300;
+    }
   }
 
   update(deltaTime) {
-    this.speed += 10 * deltaTime;
+    if (this.mode === 'ZEN') {
+      // Constant slow speed
+      this.speed = 200;
+    } else {
+      // Accelerate
+      const accel = this.mode === 'HARDCORE' ? 20 : 10;
+      this.speed += accel * deltaTime;
+    }
+
     this.distance += this.speed * deltaTime;
     this.difficultyMultiplier = 1 + (this.speed - 300) / 1000;
 
@@ -30,7 +50,10 @@ export class World {
     this.spawnTimer -= deltaTime;
     if (this.spawnTimer <= 0) {
       this.spawnObject();
-      this.spawnTimer = 0.8 / this.difficultyMultiplier;
+      let baseTime = 0.8;
+      if (this.mode === 'HARDCORE') baseTime = 0.5;
+      if (this.mode === 'ZEN') baseTime = 1.0;
+      this.spawnTimer = baseTime / this.difficultyMultiplier;
     }
 
     // Move objects
@@ -48,6 +71,23 @@ export class World {
     const rand = Math.random();
     const x = Math.random() * (this.canvas.width - 60) + 30;
     const y = -50;
+
+    if (this.mode === 'ZEN') {
+      // Zen mode: No obstacles
+      if (rand < 0.1) {
+        // Powerup
+        const type = Math.random() > 0.5 ? 'shield' : 'magnet';
+        this.powerups.push({
+          x, y, type, radius: 15, color: '#ffffff', collected: false
+        });
+      } else {
+        // Collectible
+        this.collectibles.push({
+          x, y, radius: 10, color: this.biomes[this.currentBiome].collect, collected: false
+        });
+      }
+      return;
+    }
 
     if (rand < 0.05) { // 5% chance for Powerup
       const type = Math.random() > 0.5 ? 'shield' : 'magnet';

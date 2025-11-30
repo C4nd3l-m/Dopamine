@@ -32,6 +32,10 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
 #ui-layer {
@@ -41,6 +45,7 @@ canvas {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 10;
 }
 
 .screen {
@@ -60,6 +65,10 @@ canvas {
 
 .screen.active {
   opacity: 1;
+  pointer-events: auto;
+}
+
+#main-menu {
   pointer-events: auto;
 }
 
@@ -124,4 +133,62 @@ canvas {
   box-shadow: 0 0 10px var(--neon-pink);
   transform-origin: bottom;
   transition: transform 0.1s linear;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 100;
+}
+
+.menu-btn {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 15px 40px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  pointer-events: auto;
+  position: relative;
+  z-index: 101;
+}
+
+.menu-btn:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
+#btn-hardcore {
+  border-color: #ff0055;
+  color: #ff0055;
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
+}
+
+#btn-hardcore:hover {
+  background: #ff0055;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.8);
+}
+
+#btn-zen {
+  border-color: #00ffff;
+  color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+#btn-zen:hover {
+  background: #00ffff;
+  color: #000;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
 }

@@ -99,5 +99,62 @@ export class SoundManager {
 
         gain.gain.value = 0.1;
         osc.start();
+
+        this.ambienceOsc = osc; // Keep reference to stop it
+    }
+
+    playMusic(mode = 'NORMAL') {
+        if (!this.initialized) return;
+        if (this.musicInterval) return; // Already playing
+
+        let notes, tempo, waveType;
+
+        if (mode === 'HARDCORE') {
+            // Fast, aggressive, dissonant
+            notes = [220, 233, 247, 262, 277, 294, 311, 330]; // Chromatic scale
+            tempo = 60; // Very fast
+            waveType = 'sawtooth';
+        } else if (mode === 'ZEN') {
+            // Calm, melodic, peaceful - pentatonic scale
+            notes = [261.63, 293.66, 329.63, 392.00, 440.00]; // C, D, E, G, A
+            tempo = 200; // Slow
+            waveType = 'sine';
+        } else {
+            // Normal - C minor arpeggio
+            notes = [261.63, 311.13, 392.00, 523.25]; // C, Eb, G, C
+            tempo = 100; // Medium
+            waveType = 'square';
+        }
+
+        let noteIdx = 0;
+
+        const playNote = () => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = waveType;
+            osc.frequency.setValueAtTime(notes[noteIdx], this.ctx.currentTime);
+
+            const volume = mode === 'ZEN' ? 0.05 : 0.1;
+            gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + (tempo / 1000));
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+
+            osc.start();
+            osc.stop(this.ctx.currentTime + (tempo / 1000));
+
+            noteIdx = (noteIdx + 1) % notes.length;
+        };
+
+        this.musicInterval = setInterval(playNote, tempo);
+    }
+
+    stopMusic() {
+        if (this.musicInterval) {
+            clearInterval(this.musicInterval);
+            this.musicInterval = null;
+        }
     }
 }

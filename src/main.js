@@ -17,10 +17,68 @@ function init() {
     });
 
     // Event listeners for game state
-    // Simple "Swipe Up" simulation with click/touch for now
-    document.addEventListener('click', handleInput);
+    const btnNormal = document.getElementById('btn-normal');
+    const btnHardcore = document.getElementById('btn-hardcore');
+    const btnZen = document.getElementById('btn-zen');
+
+    console.log('Buttons found:', { btnNormal, btnHardcore, btnZen });
+
+    // Add click listeners with capture and debugging
+    if (btnNormal) {
+        btnNormal.addEventListener('click', (e) => {
+            console.log('Normal button clicked', e);
+            e.preventDefault();
+            e.stopPropagation();
+            startGame('NORMAL');
+        }, true);
+
+        btnNormal.addEventListener('touchstart', (e) => {
+            console.log('Normal button touched', e);
+            e.preventDefault();
+            startGame('NORMAL');
+        }, true);
+    }
+
+    if (btnHardcore) {
+        btnHardcore.addEventListener('click', (e) => {
+            console.log('Hardcore button clicked', e);
+            e.preventDefault();
+            e.stopPropagation();
+            startGame('HARDCORE');
+        }, true);
+
+        btnHardcore.addEventListener('touchstart', (e) => {
+            console.log('Hardcore button touched', e);
+            e.preventDefault();
+            startGame('HARDCORE');
+        }, true);
+    }
+
+    if (btnZen) {
+        btnZen.addEventListener('click', (e) => {
+            console.log('Zen button clicked', e);
+            e.preventDefault();
+            e.stopPropagation();
+            startGame('ZEN');
+        }, true);
+
+        btnZen.addEventListener('touchstart', (e) => {
+            console.log('Zen button touched', e);
+            e.preventDefault();
+            startGame('ZEN');
+        }, true);
+    }
+
+    // Keep spacebar for quick restart or default start
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') handleInput();
+    });
+
+    // Also add click listener to game over screen
+    gameOverScreen.addEventListener('click', () => {
+        if (gameState === 'GAMEOVER') {
+            resetGame();
+        }
     });
 }
 
@@ -28,17 +86,19 @@ let gameState = 'MENU'; // MENU, PLAYING, GAMEOVER
 
 function handleInput() {
     if (gameState === 'MENU') {
-        startGame();
+        // Default to normal if space pressed
+        startGame('NORMAL');
     } else if (gameState === 'GAMEOVER') {
         resetGame();
     }
 }
 
-function startGame() {
+function startGame(mode) {
+    console.log('Starting game with mode:', mode);
     gameState = 'PLAYING';
     mainMenu.classList.remove('active');
     gameHud.classList.add('active');
-    engine.start();
+    engine.start(mode);
 }
 
 function handleGameOver(score) {
